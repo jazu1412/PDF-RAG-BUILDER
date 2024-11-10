@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The State of Food Security and Nutrition 2024</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        #query-form {
+            display: flex;
+            margin-bottom: 20px;
+            position: sticky;
+            bottom: 0;
+            background-color: #1a1a1a;
+            padding: 20px 0;
+            z-index: 100;
+        }
+        #query-input {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        #query-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+        #submit-button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        #submit-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        #chat-container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #4CAF50 #2d2d2d;
+        }
+        #chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-container::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background-color: #4CAF50;
+            border-radius: 4px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background-color: #4CAF50;
+            margin-left: 20%;
+            margin-right: 0;
+            color: white;
+        }
+        .bot-message {
+            background-color: #383838;
+            margin-right: 20%;
+            margin-left: 0;
+            color: #ffffff;
+            line-height: 1.6;
+            text-align: justify;
+            padding: 16px;
+            letter-spacing: 0.3px;
+        }
+        .bot-message p {
+            margin: 0 0 12px 0;
+            text-indent: 20px;
+        }
+        .bot-message strong {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        .header-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        .header-image:hover {
+            transform: scale(1.02);
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.3;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        ::placeholder {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>The State of Food Security and Nutrition in World</h1>
+    <img src="https://images.unsplash.com/photo-1444392061186-9fc38f84f726?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="Empty bowl symbolizing hunger" class="header-image">
+    
+    <div id="chat-container"></div>
+    
+    <form id="query-form">
+        <input type="text" id="query-input" placeholder="Ask questions about global hunger statistics and findings..." required>
+        <button type="submit" id="submit-button">Submit</button>
+    </form>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // Format the content with paragraphs if it's a bot message
+            if (!isUser) {
+                const paragraphs = content.split('\n\n').filter(p => p.trim());
+                content = paragraphs.map(p => `<p>${p}</p>`).join('');
+            }
+            
+            messageDiv.innerHTML = `
+                ${content}
+                <div class="timestamp">${timestamp}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        document.getElementById('query-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('query-input').value;
+            
+            // Add user message
+            addMessage(query, true);
+            
+            // Add loading message
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot-message';
+            loadingDiv.textContent = 'Loading...';
+            chatContainer.appendChild(loadingDiv);
+            
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Remove loading message
+                chatContainer.removeChild(loadingDiv);
+                
+                // Add bot response
+                addMessage(data.message?.content || 'No content found in the response.');
+                
+                // Clear input
+                document.getElementById('query-input').value = '';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                // Remove loading message
+                chatContainer.removeChild(loadingDiv);
+                // Add error message
+                addMessage('An error occurred while fetching the result.');
+            }
+        });
+    </script>
+</body>
+</html>
