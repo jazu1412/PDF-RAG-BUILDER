@@ -63,6 +63,104 @@ graph LR
     D --> E[Response Generation]
 ```
 
+
+
+## System Architecture & Data Flow
+
+### Complete System Overview
+```mermaid
+graph TB
+    subgraph "Document Processing"
+        A[PDF Upload] --> B[PDF Text Extraction]
+        B --> C[Text Chunking]
+        C --> D[Chunk Processing]
+        D --> |4000 token chunks| E[OpenAI Embedding Generation]
+        E --> F[MongoDB Storage]
+    end
+
+    subgraph "Query Processing"
+        G[User Query] --> H[Query Embedding]
+        H --> I[Vector Similarity Search]
+        I --> J[Context Selection]
+        J --> K[Response Generation]
+    end
+
+    subgraph "Database Layer"
+        F --> |Store Documents| L[(MongoDB)]
+        L --> |Retrieve Similar Docs| I
+    end
+
+    subgraph "Temporal Analysis"
+        M[Year Detection] --> N{Multi-Year Query?}
+        N --> |Yes| O[Compare Across Years]
+        N --> |No| P[Single Year Analysis]
+        O --> J
+        P --> J
+    end
+```
+
+### Chunk Creation Process
+```mermaid
+graph LR
+    subgraph "Text Chunking System"
+        A[Raw PDF Text] --> B[Split into Sentences]
+        B --> C{Chunk Size Check}
+        C --> |< 4000 tokens| D[Create Chunk]
+        C --> |> 4000 tokens| E[Split Further]
+        E --> C
+        D --> F[Add Metadata]
+        F --> G[Generate Embedding]
+        G --> H[(Store in MongoDB)]
+    end
+```
+
+### Query Processing Flow
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as Server
+    participant E as Embedding Service
+    participant DB as MongoDB
+    participant AI as OpenAI
+
+    U->>S: Submit Query
+    S->>E: Generate Query Embedding
+    E->>AI: Request Embedding
+    AI-->>E: Return Embedding Vector
+    S->>DB: Find Similar Documents
+    DB-->>S: Return Matched Documents
+    S->>S: Process Year Detection
+    alt Multiple Years Detected
+        S->>S: Compare Across Years
+    else Single Year
+        S->>S: Single Context Analysis
+    end
+    S->>AI: Generate Response
+    AI-->>S: Return Response
+    S->>U: Send Final Answer
+```
+
+### Data Structure Flow
+```mermaid
+graph TD
+    subgraph "Document Structure"
+        A[PDF Document] --> B[Text Extraction]
+        B --> C[Chunks]
+        C --> |Metadata| D[Document Record]
+        C --> |Content| E[Vector Embedding]
+        D --> F[(MongoDB Document)]
+        E --> F
+    end
+
+    subgraph "MongoDB Schema"
+        F --> G[Title]
+        F --> H[Description]
+        F --> I[FileName]
+        F --> J[UploadDate]
+        F --> K[Embedding Array]
+    end
+```
+
 ## Execution Flow
 
 ### 1. Document Upload & Processing
