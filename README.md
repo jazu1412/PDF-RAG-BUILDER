@@ -74,15 +74,20 @@ graph TB
         A[PDF Upload] --> B[PDF Text Extraction]
         B --> C[Text Chunking]
         C --> D[Chunk Processing]
-        D --> |4000 token chunks| E[OpenAI Embedding Generation]
-        E --> F[MongoDB Storage]
+        D --> |4000 token chunks| E[OpenAI API Request]
+        E --> |text-embedding-3-small| OAIA[OpenAI API]
+        OAIA --> |Embedding Vector| E1[Store Embedding]
+        E1 --> F[MongoDB Storage]
     end
 
     subgraph "Query Processing"
-        G[User Query] --> H[Query Embedding]
-        H --> I[Vector Similarity Search]
+        G[User Query] --> H[Query to OpenAI]
+        H --> |text-embedding-3-small| OAIB[OpenAI API]
+         OAIB --> |Query Embedding| I[Vector Similarity Search]
         I --> J[Context Selection]
-        J --> K[Response Generation]
+        J --> K[OpenAI Chat Request]
+        K --> |GPT Model| OAIC[OpenAI API]
+        OAIC --> |Generated Response| K1[Final Response]
     end
 
     subgraph "Database Layer"
